@@ -22,11 +22,13 @@ class Colors:
     WHITE = "\033[97m"
     DIM = "\033[2m"
 
+
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
+
 def live_clock():
-    print(f"{Colors.YELLOW}Live clock running...  Ctrl+C → GAME ON{Colors.RESET}\n")
+    print(f"{Colors.YELLOW}Live clock running... Ctrl+C → GAME ON{Colors.RESET}\n")
     time.sleep(1)
     try:
         while True:
@@ -35,18 +37,19 @@ def live_clock():
             tcolor = [Colors.MAGENTA, Colors.CYAN, Colors.YELLOW][now.second % 3]
 
             clear_screen()
-            print(f"{Colors.BOLD}{Colors.BLUE}═"*55 + Colors.RESET)
-            print(f"      {Colors.CYAN}T E R M I N A L   C L O C K{Colors.RESET}    ")
-            print(f"{Colors.BOLD}{Colors.BLUE}═"*55 + Colors.RESET + "\n")
+            print(f"{Colors.BOLD}{Colors.BLUE}{'═' * 55}{Colors.RESET}")
+            print(f"      {Colors.CYAN}T E R M I N A L   C L O C K{Colors.RESET}")
+            print(f"{Colors.BOLD}{Colors.BLUE}{'═' * 55}{Colors.RESET}\n")
             print(f" {Colors.GREEN}Date :{Colors.RESET} March 05, 2026")
             print(f" {tcolor}Time :{Colors.RESET} {tcolor}{time_str}{Colors.RESET}\n")
-            print(f"{Colors.BOLD}{Colors.BLUE}═"*55 + Colors.RESET)
+            print(f"{Colors.BOLD}{Colors.BLUE}{'═' * 55}{Colors.RESET}")
             print(f" {Colors.YELLOW}Press Ctrl+C to start the guessing game!{Colors.RESET}\n")
             time.sleep(1.0 - (time.time() % 1.0))
     except KeyboardInterrupt:
         clear_screen()
         print(f"\n{Colors.GREEN}Entering game mode...{Colors.RESET}\n")
         time.sleep(0.6)
+
 
 # ─── Ultra Interactive Guessing Game ─────────────────────────────────────────
 def number_guessing_game():
@@ -56,11 +59,12 @@ def number_guessing_game():
 
     while True:
         clear_screen()
-        print(f"{Colors.MAGENTA}{'═'*48}{Colors.RESET}")
+        print(f"{Colors.MAGENTA}{'═' * 48}{Colors.RESET}")
         print(f"{Colors.BOLD}{Colors.MAGENTA}     U L T R A   G U E S S   A R E N A     {Colors.RESET}")
-        print(f"{Colors.MAGENTA}{'═'*48}{Colors.RESET}\n")
+        print(f"{Colors.MAGENTA}{'═' * 48}{Colors.RESET}\n")
 
-        print(f" {Colors.CYAN}Score:{Colors.RESET} {Colors.BOLD}{score}{Colors.RESET}   {Colors.YELLOW}High:{Colors.RESET} {Colors.BOLD}{high_score}{Colors.RESET}")
+        print(f" {Colors.CYAN}Score:{Colors.RESET} {Colors.BOLD}{score}{Colors.RESET}   "
+              f"{Colors.YELLOW}High:{Colors.RESET} {Colors.BOLD}{high_score}{Colors.RESET}")
         print(f" {Colors.GREEN}Streak:{Colors.RESET} {streak}x\n")
 
         # Difficulty selection
@@ -82,6 +86,7 @@ def number_guessing_game():
 
         secret = random.randint(1, max_n)
         attempts = 0
+        prev_guess = None           # ← FIXED: prevent NameError on first "closer/farther"
         start_time = time.time()
         low, high = 1, max_n
 
@@ -90,8 +95,9 @@ def number_guessing_game():
         lifeline_extra = True
         lifeline_parity = True
 
-        print(f"\n{Colors.CYAN}Difficulty: {Colors.BOLD}{diff_name}{Colors.RESET}  →  Range: 1–{max_n}   Attempts: {max_attempts}\n")
-        print(f"{Colors.YELLOW}Commands:  hint, 50, extra, parity, quit{Colors.RESET}\n")
+        print(f"\n{Colors.CYAN}Difficulty: {Colors.BOLD}{diff_name}{Colors.RESET}  "
+              f"→  Range: 1–{max_n}   Attempts: {max_attempts}\n")
+        print(f"{Colors.YELLOW}Commands: hint, 50, extra, parity, quit{Colors.RESET}\n")
 
         while attempts < max_attempts:
             try:
@@ -99,7 +105,7 @@ def number_guessing_game():
                 prompt = f"{Colors.GREEN}#{attempts+1}/{max_attempts}  Guess → {Colors.RESET}"
                 guess_str = input(prompt).strip().lower()
 
-                # Speed feedback
+                # Quick start feedback
                 if elapsed < 5 and attempts == 0 and guess_str.isdigit():
                     print(f"{Colors.DIM}(Quick start!){Colors.RESET}")
 
@@ -140,13 +146,14 @@ def number_guessing_game():
                 now_time = time.time()
 
                 # Update range
-                if guess < secret:  low  = max(low,  guess + 1)
-                if guess > secret:  high = min(high, guess - 1)
+                if guess < secret:
+                    low = max(low, guess + 1)
+                if guess > secret:
+                    high = min(high, guess - 1)
 
                 if guess == secret:
                     diff_time = now_time - start_time
                     clear_screen()
-
                     print(f"\n{Colors.GREEN}{'╔' + '═'*30 + '╗'}{Colors.RESET}")
                     print(f"{Colors.GREEN}║  🎉  VICTORY !   🎉  ║{Colors.RESET}")
                     print(f"{Colors.GREEN}{'╚' + '═'*30 + '╝'}{Colors.RESET}\n")
@@ -155,7 +162,7 @@ def number_guessing_game():
                     print(f"  Attempts → {attempts} / {max_attempts}")
                     print(f"  Time → {diff_time:.1f} s\n")
 
-                    points = max(100 - attempts*8 - int(diff_time*2), 10)
+                    points = max(100 - attempts * 8 - int(diff_time * 2), 10)
                     score += points
                     streak += 1
 
@@ -175,26 +182,37 @@ def number_guessing_game():
                 # Temperature scale
                 diff = abs(guess - secret)
                 temp = ""
-                if diff <= 2:    temp, bell = f"{Colors.RED}🔥🔥🔥 SCORCHING!", "\a"
-                elif diff <= 5:  temp = f"{Colors.RED}🔥🔥 BURNING!"
-                elif diff <= 10: temp = f"{Colors.YELLOW}🔥 HOT!"
-                elif diff <= 20: temp = f"{Colors.CYAN}≈ WARM"
-                elif diff <= 40: temp = f"{Colors.BLUE}❄️ COLD"
-                else:            temp = f"{Colors.BLUE}❄️❄️ FREEZING"
+                bell = ""  # ← FIXED: always define bell
 
-                direction = "WAY too high" if guess > secret + 40 else \
-                            "too high" if guess > secret else \
-                            "WAY too low" if guess < secret - 40 else "too low"
+                if diff <= 2:
+                    temp, bell = f"{Colors.RED}🔥🔥🔥 SCORCHING!", "\a"
+                elif diff <= 5:
+                    temp = f"{Colors.RED}🔥🔥 BURNING!"
+                elif diff <= 10:
+                    temp = f"{Colors.YELLOW}🔥 HOT!"
+                elif diff <= 20:
+                    temp = f"{Colors.CYAN}≈ WARM"
+                elif diff <= 40:
+                    temp = f"{Colors.BLUE}❄️ COLD"
+                else:
+                    temp = f"{Colors.BLUE}❄️❄️ FREEZING"
+
+                direction = ("WAY too high" if guess > secret + 40 else
+                             "too high" if guess > secret else
+                             "WAY too low" if guess < secret - 40 else "too low")
 
                 print(f"{Colors.BOLD}{direction.upper()}{Colors.RESET}  {temp}{Colors.RESET}")
 
-                if bell: print(bell, end="", flush=True)
+                if bell:
+                    print(bell, end="", flush=True)
 
                 # Direction change feedback
-                if attempts >= 2:
+                if attempts >= 2 and prev_guess is not None:
                     prev_diff = abs(prev_guess - secret)
-                    if diff < prev_diff:    print(f"{Colors.GREEN}↗ closer!{Colors.RESET}")
-                    elif diff > prev_diff:  print(f"{Colors.RED}↘ farther...{Colors.RESET}")
+                    if diff < prev_diff:
+                        print(f"{Colors.GREEN}↗ closer!{Colors.RESET}")
+                    elif diff > prev_diff:
+                        print(f"{Colors.RED}↘ farther...{Colors.RESET}")
 
                 prev_guess = guess
                 print()
@@ -205,7 +223,7 @@ def number_guessing_game():
                 print(f"\n{Colors.RED}Match aborted.{Colors.RESET}\n")
                 return
 
-        else:
+        else:  # out of attempts
             clear_screen()
             print(f"\n{Colors.RED}{'╔' + '═'*30 + '╗'}{Colors.RESET}")
             print(f"{Colors.RED}║     GAME OVER      ║{Colors.RESET}")
@@ -216,15 +234,17 @@ def number_guessing_game():
             time.sleep(2.2)
 
         # Next round?
-        print(f"{Colors.CYAN}Another round? (y/n){Colors.RESET} ", end="")
+        print(f"{Colors.CYAN}Another round? (y/n): {Colors.RESET}", end="")
         if input().strip().lower() not in ('y', 'yes', ''):
             clear_screen()
-            print(f"{Colors.GREEN}Session ended → Score: {score}   High: {high_score}   Best streak: {streak}{Colors.RESET}\n")
+            print(f"{Colors.GREEN}Session ended → Score: {score}   "
+                  f"High: {high_score}   Best streak: {streak}{Colors.RESET}\n")
             print(f"{Colors.YELLOW}See you in the arena again soon!{Colors.RESET}\n")
             break
 
+
 def main():
-    print("\033[?25l", end="", flush=True)   # hide cursor
+    print("\033[?25l", end="", flush=True)  # hide cursor
     try:
         live_clock()
     except KeyboardInterrupt:
@@ -236,6 +256,7 @@ def main():
         clear_screen()
         print("\033[?25h", end="", flush=True)  # restore cursor
         print(f"{Colors.GREEN}Thanks for playing!{Colors.RESET}\n")
+
 
 if __name__ == "__main__":
     if not sys.stdout.isatty():
